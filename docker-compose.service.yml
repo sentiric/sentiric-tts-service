@@ -1,0 +1,20 @@
+
+services:
+  tts-service:
+    image: ${DOCKER_REGISTRY:-ghcr.io/sentiric}/sentiric-tts-service:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sentiric_tts_service
+    env_file:
+      - ./.env
+    # ports:
+    #   - "5002:5002"
+    networks:
+      - sentiric-net
+    restart: unless-stopped
+
+networks:
+  sentiric-net:
+    name: ${NETWORK_NAME:-sentiric-net}
+    driver: bridge
