@@ -13,7 +13,7 @@ services:
           SERVICE_NAME: sentiric-tts-service
 
       env_file: 
-        - ./.env
+        - ./.env.docker
 
       # volumes:
       #   - ../sentiric-infrastructure/tls/certs:/etc/sentiric/tls:ro
@@ -30,5 +30,6 @@ services:
 
       restart: always
 
-      mem_limit: 512m
-      cpus: 0.5      
+      # mem_limit: 2048m # <-- Bu satırı geçici olarak yorum satırı yapın veya
+      mem_limit: 6g # <-- 6GB gibi daha yüksek bir değere ayarlayın
+      cpus: '2.0'

@@ -1,36 +1,48 @@
-# Sentiric TTS Service (Text-to-Speech)
+# 🎙️ Sentiric TTS Service
 
-**Description:** An AI service within the Sentiric platform dedicated to converting text input into natural-sounding human speech.
+**Açıklama:** Sentiric platformu için yüksek kaliteli, çok dilli metin-konuşma (Text-to-Speech) sentezi sağlayan, üretim kalitesinde bir mikroservis.
 
-**Core Responsibilities:**
-*   Receiving text prompts from various services.
-*   Synthesizing high-quality audio waveforms in various languages and voices.
-*   Returning the synthesized audio in appropriate formats (e.g., PCM, Opus, MP3).
-*   Managing and updating underlying Text-to-Speech models.
+**Temel Yetenekler:**
+*   **Yüksek Kaliteli Ses:** Coqui `XTTS-v2` modelini kullanarak doğal ve klonlanabilir sesler üretir.
+*   **Çok Dilli:** Türkçe, İngilizce dahil olmak üzere birçok dili destekler.
+*   **Optimize Edilmiş:** "Sıfır bütçe" hedefine uygun olarak, CPU üzerinde verimli çalışacak şekilde tasarlanmış ve Docker imaj boyutu optimize edilmiştir.
+*   **Üretime Hazır:** Uygulama başlarken modeli belleğe yükler, `/health` endpoint'i ile durumu hakkında bilgi verir ve `governance` standartlarına uygun loglama yapar.
 
-**Technologies:**
-*   Python
-*   TensorFlow, PyTorch, or other ML frameworks
-*   Flask/FastAPI (for REST API)
+---
 
-**API Interactions (As an API Provider):**
-*   Exposes a RESTful API for `sentiric-agent-service` and `sentiric-api-gateway-service` to request text-to-speech conversions.
+## 🚀 Hızlı Başlangıç (Docker ile)
 
-**Local Development:**
-1.  Clone this repository: `git clone https://github.com/sentiric/sentiric-tts-service.git`
-2.  Navigate into the directory: `cd sentiric-tts-service`
-3.  Create a virtual environment and install dependencies: `python -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
-4.  Create a `.env` file from `.env.example` (if any).
-5.  Start the service: `python app.py` (or equivalent).
+Bu servis, `sentiric-infrastructure` reposundaki merkezi `docker-compose` ile platformun bir parçası olarak çalışmak üzere tasarlanmıştır. Tek başına çalıştırmak ve test etmek için:
 
-**Configuration:**
-Refer to `config/` directory and `.env.example` for service-specific configurations.
+1.  **`.env` Dosyası Oluşturun:**
+    `.env.example` dosyasını `.env` olarak kopyalayın. Genellikle varsayılan ayarlar yerel testler için yeterlidir.
 
-**Deployment:**
-Designed for containerized deployment (e.g., Docker, Kubernetes), potentially with GPU acceleration if using advanced models. Refer to `sentiric-infrastructure`.
+2.  **Referans Ses Dosyası Ekleyin:**
+    Proje kök dizininde bir `audio` klasörü oluşturun ve içine `reference_tr.wav` adında yüksek kaliteli bir referans ses dosyası koyun.
 
-**Contributing:**
-We welcome contributions! Please refer to the [Sentiric Governance](https://github.com/sentiric/sentiric-governance) repository for coding standards and contribution guidelines.
+3.  **Servisi Başlatın:**
+    ```bash
+    docker compose -f docker-compose.service.yml up --build
+    ```
+    Modelin ilk kez yüklenmesi birkaç dakika sürebilir. Loglarda `Uygulama hazır ve istekleri kabul ediyor.` mesajını gördüğünüzde servis hazır demektir.
 
-**License:**
-This project is licensed under the [License](LICENSE).
+---
+
+## 🤖 API Kullanımı ve Demo
+
+Servisin API'ını test etmek ve canlı bir demo görmek için lütfen aşağıdaki rehberi inceleyin:
+
+➡️ **[API Kullanım ve Demo Rehberi (DEMO.md)](DEMO.md)**
+
+---
+
+## 🧪 Otomatize Testleri Çalıştırma
+
+Kodda değişiklik yapmadan önce veya yaptıktan sonra, sistemin bütünlüğünü doğrulamak için otomatize testleri çalıştırın:
+
+```bash
+# Geliştirme bağımlılıklarını kur
+poetry install --with dev
+
+# Testleri çalıştır
+poetry run pytest -v

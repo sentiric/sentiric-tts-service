@@ -1,13 +1,37 @@
-[project]
+[tool.poetry]
 name = "sentiric-tts-service"
 version = "0.1.0"
-description = "Text-to-Speech service for Sentiric Platform."
-requires-python = ">=3.10"
-dependencies = [
-    "fastapi",
-    "uvicorn[standard]",
-    "structlog",
-    "python-dotenv",
-    # Renkli konsol logları için GEREKLİ
-    "colorama>=0.4.6"
-]
+description = "High-quality Text-to-Speech service for the Sentiric Platform."
+authors = ["Azmi Sahin <azmisahin@outlook.com>"]
+readme = "README.md"
+
+[[tool.poetry.source]]
+name = "pytorch_cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
+
+[tool.poetry.dependencies]
+python = "~3.11"
+fastapi = "^0.111.0"
+uvicorn = {extras = ["standard"], version = "^0.29.0"}
+structlog = "^24.0.0"
+python-dotenv = "^1.0.1"
+pydantic-settings = "^2.3.4"
+torch = {version = "^2.3.0", source = "pytorch_cpu"}
+torchaudio = {version = "^2.3.0", source = "pytorch_cpu"}
+
+TTS = { git = "https://github.com/azmisahin-forks/coqui-TTS.git", branch = "sentiric" }
+
+# --- DEĞİŞİKLİK BURADA: Transformers versiyonunu sabitliyoruz ---
+# Bu, senin MVP projende çalışan ve TTS fork'un ile uyumlu olan versiyondur.
+transformers = "4.39.3"
+
+httpx = "^0.27.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+httpx = "^0.27.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
