@@ -1,46 +1,43 @@
-[tool.poetry]
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
 name = "sentiric-tts-service"
 version = "0.1.0"
-description = "High-quality Text-to-Speech service for the Sentiric Platform."
-authors = ["Azmi Sahin <azmisahin@outlook.com>"]
+description = "Sentiric TTS Service for text-to-speech synthesis."
 readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "pydantic-settings",
+    "python-dotenv",
+    "structlog",
+    "prometheus-fastapi-instrumentator",
+    "httpx",
+    "soundfile",
+    "numpy",
+    "torch==2.3.0",
+    "torchaudio==2.3.0",
+    "transformers==4.39.3",
 
-[[tool.poetry.source]]
-name = "pytorch_cpu"
-url = "https://download.pytorch.org/whl/cpu"
-priority = "explicit"
+    # --- SÖZDİZİMİ DÜZELTMESİ ---
+    # setuptools'un anlayacağı PEP 508 formatını kullanıyoruz.
+    "TTS @ git+https://github.com/azmisahin-forks/coqui-TTS.git@sentiric"
+]
 
-[tool.poetry.dependencies]
-python = "~3.11"
-fastapi = "^0.111.0"
-uvicorn = {extras = ["standard"], version = "^0.29.0"}
-structlog = "^24.0.0"
-python-dotenv = "^1.0.1"
-pydantic-settings = "^2.3.4"
-torch = {version = "^2.3.0", source = "pytorch_cpu"}
-torchaudio = {version = "^2.3.0", source = "pytorch_cpu"}
-transformers = "4.39.3"
-httpx = "^0.27.0"
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "pytest-asyncio",
+    "pytest-mock",
+]
 
-# --- DEĞİŞİKLİK BURADA: TTS'i daha kontrollü kuruyoruz ---
-# Kendi fork'umuzu kullanmaya devam ediyoruz, bu torch.load hatasını çözüyor.
-# `extras = ["all-singleton"]` ekleyerek, `numba` ve `librosa` gibi sorunlu
-# olabilecek bazı ekstra bağımlılıkların kurulmasını engelliyoruz.
-TTS = { git = "https://github.com/azmisahin-forks/coqui-TTS.git", branch = "sentiric", extras = ["all-singleton"] }
+[tool.setuptools]
+packages = ["app"]
 
-# TTS'in temel çalışması için yine de ihtiyaç duyduğu bazı paketleri manuel olarak ekliyoruz.
-# Bu, "package would be ignored" uyarılarını da giderecektir.
-numba = ">=0.58.0"
-librosa = ">=0.10.1"
-# ... (TTS'in diğer temel bağımlılıkları poetry.lock dosyasında zaten çözülmüş olmalı)
-
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.2.2"
-httpx = "^0.27.0"
-pytest-mock = "^3.14.0"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

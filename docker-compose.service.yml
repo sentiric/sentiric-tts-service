@@ -1,35 +1,56 @@
 networks:
   sentiric-net:
+    # Ana altyapı tarafından oluşturulan ağı kullanacağımızı belirtiyoruz
+    # external: true
     name: ${NETWORK_NAME:-sentiric-net}
-    driver: bridge
 
 services:
-  tts-service:       
+  tts-service:
+    # YENİ: İmaj ismini standartlaştırıyoruz
+    image: ghcr.io/sentiric/sentiric-tts-service:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
 
-      build:
-        context: .
-        dockerfile: Dockerfile
-        args:
-          SERVICE_NAME: sentiric-tts-service
 
-      env_file: 
-        - ./.env.docker
+    env_file:
+      - ./.env.docker
 
-      # volumes:
-      #   - ../sentiric-infrastructure/tls/certs:/etc/sentiric/tls:ro
+    # volumes:
+    #   - ../sentiric-infrastructure/tls/certs:/etc/sentiric/tls:ro
+    # NOT: stt-service'te yaptığımız gibi kalıcı model cache'i burada da
+    # kullanabiliriz, ancak model build sırasında indirildiği için
+    # şu an için zorunlu değil.
 
-      ports:
-        - "${TTS_SERVICE_PORT}:${TTS_SERVICE_PORT}"
+    networks:
+      - sentiric-net
 
-      networks:
-        - sentiric-net
-      
-      profiles:
-        - default
-        - ai
+    ports:
+      - "${TTS_SERVICE_PORT}:${TTS_SERVICE_PORT}"
 
-      restart: always
+    profiles:
+      - default
+      - ai
+    
+    # YENİ: Healthcheck ekliyoruz
+    healthcheck:
+      # Container içindeki curl ile test ediyoruz
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      # Modelin yüklenmesi için başlangıçta daha uzun bir süre tanıyoruz
+      start_period: 5m 
 
-      # mem_limit: 2048m # <-- Bu satırı geçici olarak yorum satırı yapın veya
-      mem_limit: 6g # <-- 6GB gibi daha yüksek bir değere ayarlayın
-      cpus: '2.0'
+    # Kaynak limitleri, özellikle XTTS modeli için önemlidir.
+    # Bu değerleri makinenizin kapasitesine göre ayarlayabilirsiniz.
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 6G
+        reservations:
+          memory: 2G
+
+    restart: unless-stopped
+
