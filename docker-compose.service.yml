@@ -6,8 +6,7 @@ networks:
 
 services:
   tts-service:
-    # YENİ: İmaj ismini standartlaştırıyoruz
-    image: ghcr.io/sentiric/sentiric-tts-service:latest
+
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,7 +16,7 @@ services:
       - ./.env.docker
 
     # volumes:
-    #   - ../sentiric-infrastructure/tls/certs:/etc/sentiric/tls:ro
+    #   - ../sentiric-config/tls/certs:/etc/sentiric/tls:ro
     # NOT: stt-service'te yaptığımız gibi kalıcı model cache'i burada da
     # kullanabiliriz, ancak model build sırasında indirildiği için
     # şu an için zorunlu değil.
