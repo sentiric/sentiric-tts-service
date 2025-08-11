@@ -2,8 +2,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 from typing import Optional
-# torch import'u artık gerekli değil
-# import torch 
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Sentiric TTS Service"
@@ -23,10 +21,15 @@ class Settings(BaseSettings):
         validation_alias="TTS_DEFAULT_SPEAKER_WAV_PATH"
     )
     
-    # device property'si buradan kaldırıldı.
+    # --- YENİ: ElevenLabs ayarları ---
+    ENABLE_ELEVENLABS_TTS: bool = Field(False, validation_alias="ENABLE_ELEVENLABS_TTS")
+    ELEVENLABS_API_KEY: Optional[str] = Field(None, validation_alias="ELEVENLABS_API_KEY")
+    ELEVENLABS_VOICE_ID: Optional[str] = Field("pNInz6obpgDQGxUGXP57", validation_alias="ELEVENLABS_VOICE_ID")
+
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding='utf-8', 
+        env_file=".env.docker", # .env.docker'ı okuyacak şekilde güncellendi
+        env_file_encoding='utf-8', 
         extra='ignore', case_sensitive=False
     )
 
