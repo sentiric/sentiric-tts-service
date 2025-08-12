@@ -1,48 +1,44 @@
-# 🎙️ Sentiric TTS Service
+# 🎙️ Sentiric TTS Service (Legacy/Hybrid Engine)
 
-**Açıklama:** Sentiric platformu için yüksek kaliteli, çok dilli metin-konuşma (Text-to-Speech) sentezi sağlayan, üretim kalitesinde bir mikroservis.
+[![Status](https://img.shields.io/badge/status-refactoring-yellow.svg)]()
+[![Python Version](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
 
-**Temel Yetenekler:**
-*   **Yüksek Kaliteli Ses:** Coqui `XTTS-v2` modelini kullanarak doğal ve klonlanabilir sesler üretir.
-*   **Çok Dilli:** Türkçe, İngilizce dahil olmak üzere birçok dili destekler.
-*   **Optimize Edilmiş:** "Sıfır bütçe" hedefine uygun olarak, CPU üzerinde verimli çalışacak şekilde tasarlanmış ve Docker imaj boyutu optimize edilmiştir.
-*   **Üretime Hazır:** Uygulama başlarken modeli belleğe yükler, `/health` endpoint'i ile durumu hakkında bilgi verir ve `governance` standartlarına uygun loglama yapar.
+**Sentiric TTS Service**, Sentiric platformunun orijinal, hepsi bir arada ses sentezleme motorudur. Hem yerel **Coqui XTTS** modelini hem de bulut tabanlı **ElevenLabs** API'sini tek bir servis altında birleştirir.
+
+**NOT:** Bu servis, platformun "Ses Orkestrasyon Katmanı" vizyonu doğrultusunda yeniden yapılandırılmaktadır. İçindeki mantık, `sentiric-coqui-tts-service` ve `sentiric-elevenlabs-tts-service` gibi **uzman motorlara** ve bu motorları yönetecek olan `sentiric-tts-gateway-service`'e taşınmaktadır. **Bu repo, geçiş tamamlandığında arşivlenecektir.**
+
+## 🎯 Temel Sorumluluklar (Mevcut Durum)
+
+*   **Hibrit Sentezleme:** Gelen bir isteği, öncelikli olarak ElevenLabs (eğer aktifse) ile sentezlemeye çalışır. Başarısız olursa veya aktif değilse, Coqui XTTS modelini kullanarak sentezleme yapar.
+*   **Dinamik Ses Klonlama:** `speaker_wav_url` parametresi ile gelen bir referans ses dosyasını indirip, Coqui XTTS motorunu kullanarak sesi o sese benzeterek üretir.
+*   **API Sunucusu:** `/api/v1/synthesize` endpoint'i üzerinden ses sentezleme isteklerini kabul eder.
+
+## 🛠️ Teknoloji Yığını
+
+*   **Dil:** Python
+*   **Web Çerçevesi:** FastAPI
+*   **AI Motorları:** `TTS` (Coqui XTTS-v2), `httpx` (ElevenLabs API için)
+*   **Paketleme:** `pyproject.toml` (setuptools)
+
+## 🔌 API Etkileşimleri
+
+*   **Gelen (Sunucu):**
+    *   `sentiric-agent-service` (REST/JSON)
+*   **Giden (İstemci):**
+    *   `api.elevenlabs.io` (REST/JSON)
+    *   Harici URL'ler (HTTP): Dinamik `speaker_wav_url`'leri indirmek için.
+
+## 🚀 Yerel Geliştirme
+
+1.  **Bağımlılıkları Kurun:** `pip install -e ".[dev]"`
+2.  **`.env` Dosyasını Oluşturun:** `.env.docker`'ı kopyalayın ve API anahtarlarınızı girin.
+3.  **Servisi Başlatın:** `uvicorn app.main:app --reload --port 5002`
+
+## 🤝 Katkıda Bulunma
+
+Bu repo yeniden yapılandırma sürecinde olduğu için, yeni özellik eklemek yerine mevcut mantığın yeni `tts-gateway` mimarisine taşınmasına yardımcı olacak katkılar önceliklidir.
 
 ---
+## 🏛️ Anayasal Konum
 
-## 🚀 Hızlı Başlangıç (Docker ile)
-
-Bu servis, `sentiric-infrastructure` reposundaki merkezi `docker-compose` ile platformun bir parçası olarak çalışmak üzere tasarlanmıştır. Tek başına çalıştırmak ve test etmek için:
-
-1.  **`.env` Dosyası Oluşturun:**
-    `.env.example` dosyasını `.env` olarak kopyalayın. Genellikle varsayılan ayarlar yerel testler için yeterlidir.
-
-2.  **Referans Ses Dosyası Ekleyin:**
-    Proje kök dizininde bir `audio` klasörü oluşturun ve içine `reference_tr.wav` adında yüksek kaliteli bir referans ses dosyası koyun.
-
-3.  **Servisi Başlatın:**
-    ```bash
-    docker compose -f docker-compose.service.yml up --build
-    ```
-    Modelin ilk kez yüklenmesi birkaç dakika sürebilir. Loglarda `Uygulama hazır ve istekleri kabul ediyor.` mesajını gördüğünüzde servis hazır demektir.
-
----
-
-## 🤖 API Kullanımı ve Demo
-
-Servisin API'ını test etmek ve canlı bir demo görmek için lütfen aşağıdaki rehberi inceleyin:
-
-➡️ **[API Kullanım ve Demo Rehberi (DEMO.md)](DEMO.md)**
-
----
-
-## 🧪 Otomatize Testleri Çalıştırma
-
-Kodda değişiklik yapmadan önce veya yaptıktan sonra, sistemin bütünlüğünü doğrulamak için otomatize testleri çalıştırın:
-
-```bash
-# Geliştirme bağımlılıklarını kur
-poetry install --with dev
-
-# Testleri çalıştır
-poetry run pytest -v
+Bu servis, [Sentiric Anayasası'nın (v11.0)](https://github.com/sentiric/sentiric-governance/blob/main/docs/blueprint/Architecture-Overview.md) **Zeka & Orkestrasyon Katmanı**'nda yer alan merkezi bir bileşendir.
